@@ -5,14 +5,13 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-
+from torchvision import datasets, transforms
 try:
     from apex import amp
 
 except ImportError:
     amp = None
 
-from dataset import LMDBDataset
 from pixelsnail import PixelSNAIL
 from scheduler import CycleScheduler
 
@@ -80,20 +79,24 @@ if __name__ == '__main__':
     parser.add_argument('--n_cond_res_block', type=int, default=3)
     parser.add_argument('--dropout', type=float, default=0.1)
     parser.add_argument('--amp', type=str, default='O0')
-    parser.add_argument('--sched', type=str)
-    parser.add_argument('--ckpt', type=str)
-    parser.add_argument('path', type=str)
+    parser.add_argument('--sched', type=str, default=None)
+    parser.add_argument('--ckpt', type=str, default='./checkpoint/vqvae_050.pt')
+    parser.add_argument('--path', type=str, default=None)
 
     args = parser.parse_args()
 
     print(args)
 
     device = 'cuda'
-
-    dataset = LMDBDataset(args.path)
-    loader = DataLoader(
-        dataset, batch_size=args.batch, shuffle=True, num_workers=4, drop_last=True
+    transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
+        ]
     )
+    dataset = datasets.CIFAR10(root='./CIFAR10data', transform=transform)
+    loader = DataLoader(
+        dataset, batch_size=args.batch, shuffle=True, num_workers=4, drop_last=True)
 
     ckpt = {}
 

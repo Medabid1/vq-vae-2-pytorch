@@ -72,11 +72,11 @@ def train(epoch, loader, model, optimizer, scheduler, device):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--size', type=int, default=256)
-    parser.add_argument('--epoch', type=int, default=560)
+    parser.add_argument('--size', type=int, default=32)
+    parser.add_argument('--epoch', type=int, default=50)
     parser.add_argument('--lr', type=float, default=3e-4)
-    parser.add_argument('--sched', type=str)
-    parser.add_argument('path', type=str)
+    parser.add_argument('--sched', type=str, default=None)
+    parser.add_argument('--path', type=str, default=None)
 
     args = parser.parse_args()
 
@@ -93,7 +93,7 @@ if __name__ == '__main__':
         ]
     )
 
-    dataset = datasets.ImageFolder(args.path, transform=transform)
+    dataset = datasets.CIFAR10(root='./CIFAR10data', transform=transform, download=True)
     loader = DataLoader(dataset, batch_size=128, shuffle=True, num_workers=4)
 
     model = nn.DataParallel(VQVAE()).to(device)
