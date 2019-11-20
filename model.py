@@ -51,11 +51,11 @@ class UnifModel(nn.Module):
             n_res_channel,
             stride=4)
 
-    def forward(self, mnist, svhn):
+    def forward(self, mnist, svhn, onlyTop=False,onlyBot=False):
         enc_m = self.enc_mnist(mnist)
         enc_s = self.enc_svhn(svhn)
         quant_t, quant_b_mnist, quant_b_svhn, diff, _, _, _ = self.encode(enc_m, enc_s)
-        dec_m, dec_s = self.decode(quant_t, quant_b_mnist, quant_b_svhn)
+        dec_m, dec_s = self.decode(quant_t, quant_b_mnist, quant_b_svhn, onlyTop, onlyBot)
 
         return dec_m, dec_s, diff
 
@@ -87,9 +87,15 @@ class UnifModel(nn.Module):
 
         return quant_t, quant_b_mnist, quant_b_svhn,  diff, id_t, id_b_mnist, id_b_svhn
     
-    def decode(self, quant_t, quant_b_mnist, quant_b_svhn):
+    def decode(self, quant_t, quant_b_mnist, quant_b_svhn, onlyTop=False, onlyBot=False):
         upsample_t = self.upsample_t(quant_t)
+        if onlyBot :
+            upsample_t = torch.zeros_like(upsample_t)
+        if onlyTop :
+            quant_b_mnist = torch.zeros_like(quant_b_mnist)
         quant_m  = torch.cat([upsample_t, quant_b_mnist], 1)
+        if onlyTop :
+            quant_b_svhn = torch.zeros_like(quant_b_svhn)
         quant_s  = torch.cat([upsample_t, quant_b_svhn], 1)
         dec_m = self.dec_mnist(quant_m)
         dec_s = self.dec_svhn(quant_s)

@@ -81,7 +81,7 @@ def train(epoch, mloader,sloader, model, optimizer, scheduler, device):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--size', type=int, default=32)
-    parser.add_argument('--epoch', type=int, default=150)
+    parser.add_argument('--epoch', type=int, default=30)
     parser.add_argument('--lr', type=float, default=3e-4)
     parser.add_argument('--sched', type=str, default=None)
     parser.add_argument('--path', type=str, default=None)
@@ -109,7 +109,7 @@ if __name__ == '__main__':
     mnist = datasets.MNIST(root='./mnist', transform=m_transform, download=True)
     print(len(mnist), len(svhn))
     mloader = DataLoader(mnist, batch_size=64, shuffle=True, num_workers=4)
-    sloader = DataLoader(svhn, batch_size=64, num_workers=4, sampler=SubsetRandomSampler(range(1000)))
+    sloader = DataLoader(svhn, batch_size=64, num_workers=4)#, sampler=SubsetRandomSampler(range(1000)))
     model = nn.DataParallel(UnifModel()).to(device)
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
